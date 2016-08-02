@@ -3,10 +3,11 @@ library(rvest)
 library(dplyr)
 library(visNetwork)
 library(RColorBrewer)
+library(plotly)
 
 
 ############# GET HIREARCHY DATA ################
-## RUN "GetHirearchy.R" to get this!
+## Make sure to change working directory to read this. I got this by running "GetHirearchy.R" to get this!
 
 HappyFamily <- read.csv("HappyFamily.csv",stringsAsFactors = F)
 HappyFamily <- HappyFamily[,-1]
@@ -159,7 +160,7 @@ HappyFamily$Category[gsub("(.).+","\\1",HappyFamily$Parent) =="Z"] <- "Z00-Z99"
 ## Check if I messed it up:
 # HappyFamily[is.na(HappyFamily$Category),] %>% View
 
-## and now loop through each of the Categories
+## and now loop through each of the Categories to plot
 Categories <- HappyFamily$Category%>%unique
 Categories <-  Categories[!is.na(Categories)]
 
@@ -182,3 +183,22 @@ for(i in 1:length(Categories)){
   visSave(thingie,paste("Network.deaths.popularity.",Categories[i],".html",sep=""),selfcontained = T)
   
 }
+
+########################## overall bar chart on mortality ####
+## Aggregate nodes by code, but then don't put the node, but the name per se
+nodes$Category <- HappyFamily$Category[match(nodes$name,HappyFamily$ID)]
+nodes$Category <- HappyFamily$Naames[match(nodes$Category,HappyFamily$ID)]
+
+## wrap those nasty long names
+wrap_strings  <- function(vector_of_strings,width){as.character(sapply(vector_of_strings,FUN=function(x){paste(strwrap(x,width=width), collapse="\n")}))}
+nodes$Category <- wrap_strings(nodes$Category,40)
+
+## OK, do the aggregation, but only for the grandchildren (otherwise there's doublecounting)
+nodes[!grepl("-",nodes$name),] %>% 
+  group_by(Category) %>%
+  summarize(d = sum(deaths,na.rm=T)) %>%
+  # arrange(d) %>%
+  ggplot(aes(x=Category,y=d)) + geom_bar(stat="identity") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
