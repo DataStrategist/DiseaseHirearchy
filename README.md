@@ -4,5 +4,7 @@ Visualizations of disease families by ICD code, incorporating mortality informat
 There is an overall one, and nodes per family, that look like this:
 ![alt text](https://github.com/mexindian/DiseaseHirearchy/blob/master/skinExample.PNG "Skin diseases example")
 
+
+
 They are interactive networks, so you can zoom in and mouseover for more details:
 ![alt text](https://github.com/mexindian/DiseaseHirearchy/blob/master/skinPopupExample.PNG "Skin diseases popupexample")
